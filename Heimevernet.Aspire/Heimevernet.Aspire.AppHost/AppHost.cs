@@ -17,7 +17,7 @@ var mariaDb = mariaDbServer.AddDatabase("heimevernetdb");
 //                       .WaitFor(mariaDb)
 //                       .WithHttpEndpoint(port: 8080, targetPort: 8080, name: "heimevernet-web");
 
-//Det tar en time � g� ned til �rsta r�dhus!
+//Det tar en time å gå ned til ørsta rådhus!
 
 //Variant native 
 builder.AddProject<Projects.Heimevernet_Web>("heimevernet-web")
