@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Heimevernet.Aspire/Heimevernet.Aspire.AppHost/Heimevernet.Aspire.AppHost.csproj" />
+  <Project Path="Heimevernet.Aspire/Heimevernet.Aspire.ServiceDefaults/Heimevernet.Aspire.ServiceDefaults.csproj" />
+  <Project Path="Heimevernet.Web.UnitTests/Heimevernet.Web.UnitTests.csproj" />
+  <Project Path="Heimevernet.Web/Heimevernet.Web.csproj" />
+</Solution>
