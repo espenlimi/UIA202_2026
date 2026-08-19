@@ -143,6 +143,7 @@ namespace Heimevernet.Aspire.AppHost.MariaDb
             catch (Exception e)
             {
                 logger.LogError(e, "Failed to create database '{DatabaseName}'", sqlDatabase.DatabaseName);
+                throw;
             }
         }
 
