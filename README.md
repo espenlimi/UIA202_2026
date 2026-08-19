@@ -110,7 +110,7 @@ dotnet build .\Heimevernet.slnx
 
 ## Where to make changes
 - Clone the project and open it in your IDE.
-- Connect it to your own GitHub Repository (if you want to.. )
+- Connect it to your own GitHub repository (optional).
 - Add or update page actions in `Heimevernet.Web/Controllers`.
 - Add page-specific data models in `Heimevernet.Web/Models`.
 - Add Razor pages in `Heimevernet.Web/Views`.
