@@ -7,7 +7,6 @@ namespace Heimevernet.Aspire.AppHost.MariaDb
     public static class MariaDbBuilderExtensions
     {
         private const string PasswordEnvVarName = "MARIADB_ROOT_PASSWORD";
-        private const UnixFileMode FileMode644 = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.GroupRead | UnixFileMode.OtherRead;
 
         /// <summary>
         /// Adds a MySQL server resource to the application model. For local development a container is used.
