@@ -113,7 +113,7 @@ dotnet build .\Heimevernet.slnx
 - Connect it to your own GitHub repository (optional).
 - Add or update page actions in `Heimevernet.Web/Controllers`.
 - Add page-specific data models in `Heimevernet.Web/Models`.
-- Add Razor pages in `Heimevernet.Web/Views`.
+- Add Razor views in `Heimevernet.Web/Views`.
 - Add styling in `Heimevernet.Web/wwwroot/css`.
 - Add browser JavaScript in `Heimevernet.Web/wwwroot/js`.
 - Configure local services in `Heimevernet.Aspire/Heimevernet.Aspire.AppHost/AppHost.cs`.
