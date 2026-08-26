@@ -1,0 +1,21 @@
+﻿@using Heimevernet.Web.Models.ViewModels.Resource
+@model ResourceViewModel
+@{
+    ViewData["Title"] = "Ressurs";
+}
+
+<form asp-controller="ResourceHandler" asp-action="Create" method="post">
+    <div>
+        <label asp-for="Name"></label>
+        <input asp-for="Name" />
+    </div>
+    <div>
+        <label asp-for="Description"></label>
+        <input asp-for="Description" />
+    </div>
+    <div>
+        <label asp-for="Type"></label>
+        <input asp-for="Type" />
+    </div>
+    <button type="submit">Create</button>
+</form>
