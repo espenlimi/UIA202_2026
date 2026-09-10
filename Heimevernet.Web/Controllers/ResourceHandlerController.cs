@@ -85,7 +85,7 @@ namespace Heimevernet.Web.Controllers
             return RedirectToAction("Index");
         }   
 
-        [HttpGet]
+        [HttpPost]
         public ActionResult Delete(int id)
         {
             var success = _resourceRepository.Delete(id);

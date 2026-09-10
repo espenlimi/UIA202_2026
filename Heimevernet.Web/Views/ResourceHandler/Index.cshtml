@@ -21,8 +21,9 @@
             <td>@item.Type</td>
             <td>
                 <a asp-controller="ResourceHandler" asp-action="Edit" asp-route-id="@item.Id">Rediger</a> |
-          
-                <a asp-controller="ResourceHandler" asp-action="Delete" asp-route-id="@item.Id">Slett</a>
+                <form asp-controller="ResourceHandler" asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline">
+                    <button type="submit">Slett</button>
+                </form>
             </td>
         </tr>
     }
