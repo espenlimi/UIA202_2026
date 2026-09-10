@@ -1,8 +1,12 @@
+using Heimevernet.Web.DataAccess;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 //Do Dependency Injection for the services
+
+builder.Services.AddSingleton<IResourceRepository, ResourceRepository>();
 
 
 
