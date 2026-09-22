@@ -6,6 +6,7 @@ namespace Heimevernet.Web.DataAccess;
 public class HeimevernetDbContext(DbContextOptions<HeimevernetDbContext> options) : DbContext(options)
 {
     public DbSet<Resource> Resources => Set<Resource>();
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,6 +23,18 @@ public class HeimevernetDbContext(DbContextOptions<HeimevernetDbContext> options
             entity.Property(resource => resource.Type)
                 .HasMaxLength(100)
                 .IsRequired();
+            entity.Property(resource => resource.Address)
+                .HasMaxLength(200)
+                .IsRequired(false);
+            entity.Property(resource => resource.City)
+                .HasMaxLength(100)
+                .IsRequired(false);
+            entity.Property(resource => resource.ZipCode)
+                .HasMaxLength(6)
+                .IsRequired(false);
+            entity.Property(resource => resource.OwnerTelephoneNumber)
+                .HasMaxLength(20)
+                .IsRequired(false);
         });
     }
 }

@@ -43,14 +43,8 @@ namespace Heimevernet.Web.Controllers
             }
 
             var resource = _resourceRepository.Create(model);
-            var newModel = new ResourceViewModel
-            {
-                Id = resource.Id,
-                Name = resource.Name,
-                Description = resource.Description,
-                Type = resource.Type
-            };
-            return View(newModel);
+       
+            return RedirectToAction("Index","Resource", new { id = resource.Id });
         }
 
         [HttpGet]

@@ -1,16 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Heimevernet.Web.DataAccess;
+using Heimevernet.Web.Models.ViewModels.Resource;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Heimevernet.Web.Controllers
 {
     public class ResourceController : Controller
     {
-        public IActionResult Index()
+        private readonly IResourceRepository _resourceRepository;
+
+        public ResourceController(IResourceRepository resourceRepository)
         {
-            var viewModel = new Models.ViewModels.Resource.ResourceViewModel
+            _resourceRepository = resourceRepository;
+        }
+        public IActionResult Index(int? id)
+        {
+
+            var resource = id.HasValue ? _resourceRepository.GetById(id.Value) : null;
+            var viewModel = new ResourceViewModel();
+            if (resource == null)
             {
-                Name = "Traktor",
-                Description = "Traktor med henger, parkert på åker og enger",
-                Type = "Kjøretøy"
+                return View(viewModel);
+            }
+            viewModel = new ResourceViewModel
+            {
+                Id = resource.Id,
+                Name = resource.Name,
+                Description = resource.Description,
+                Type = resource.Type
             };
 
             return View(viewModel);
