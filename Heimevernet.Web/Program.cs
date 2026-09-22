@@ -19,7 +19,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<HeimevernetDbContext>();
-    dbContext.Database.EnsureCreated();
+    dbContext.Database.Migrate();
     ResourceDbSeeder.Seed(dbContext);
 }
 

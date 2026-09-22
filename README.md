@@ -61,7 +61,7 @@ The AppHost is not the website itself. It is the program that describes the loca
 4. The controller returns a Razor view from `Heimevernet.Web/Views`.
 5. The layout and static files provide the shared page structure and styling.
 
-The MVC application includes the `Resource` entity and an Entity Framework Core data-access implementation. Aspire supplies the `heimevernetdb` connection string to the web project, and the web project creates the `Resources` table when it starts. The current setup uses `EnsureCreated`; migrations can be introduced later if the schema needs versioned production updates.
+The MVC application includes the `Resource` entity and an Entity Framework Core data-access implementation. Aspire supplies the `heimevernetdb` connection string to the web project, and the web project applies pending EF Core migrations when it starts. The initial migration creates the `Resources` table, and future schema changes should be added as new migrations.
 
 ## Start the complete application
 
