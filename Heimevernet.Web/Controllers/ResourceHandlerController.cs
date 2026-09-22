@@ -36,7 +36,12 @@ namespace Heimevernet.Web.Controllers
 
         [HttpPost]
         public ActionResult Create(ResourceViewModel model) 
-        { 
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             var resource = _resourceRepository.Create(model);
             var newModel = new ResourceViewModel
             {

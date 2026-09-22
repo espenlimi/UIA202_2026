@@ -1,17 +1,27 @@
 using Heimevernet.Web.DataAccess;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-//Do Dependency Injection for the services
 
-builder.Services.AddSingleton<IResourceRepository, ResourceRepository>();
+var connectionString = builder.Configuration.GetConnectionString("heimevernetdb")
+    ?? throw new InvalidOperationException(
+        "The 'heimevernetdb' connection string was not configured. Run the web app through Aspire.");
 
+builder.Services.AddDbContext<HeimevernetDbContext>(options =>
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+builder.Services.AddScoped<IResourceRepository, EfResourceRepository>();
 
-
-//Done with dependency injection for the services
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<HeimevernetDbContext>();
+    dbContext.Database.EnsureCreated();
+    ResourceDbSeeder.Seed(dbContext);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

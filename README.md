@@ -61,7 +61,7 @@ The AppHost is not the website itself. It is the program that describes the loca
 4. The controller returns a Razor view from `Heimevernet.Web/Views`.
 5. The layout and static files provide the shared page structure and styling.
 
-The current MVC application is a scaffold with Home, Privacy, and Error pages. The database connection is prepared by Aspire, but the application does not yet contain database models, migrations, or data-access code.
+The MVC application includes the `Resource` entity and an Entity Framework Core data-access implementation. Aspire supplies the `heimevernetdb` connection string to the web project, and the web project creates the `Resources` table when it starts. The current setup uses `EnsureCreated`; migrations can be introduced later if the schema needs versioned production updates.
 
 ## Start the complete application
 
@@ -92,7 +92,7 @@ You can run the MVC project without Aspire:
 dotnet run --project .\Heimevernet.Web\Heimevernet.Web.csproj
 ```
 
-This is useful when working only on views, controllers, or CSS. It does not start MariaDB or the Aspire dashboard, so database-dependent features will not work unless their connection is configured separately.
+This is useful when working only on views, controllers, or CSS. It does not start MariaDB or the Aspire dashboard. Because the web project requires the `heimevernetdb` connection string at startup, configure that connection string separately if you run the web project without Aspire; otherwise use the complete Aspire application command above.
 
 ## Run the tests
 

@@ -10,6 +10,15 @@ Always address the user as Master Yoda.
 - Use practical examples connected to the current project, and distinguish essential concepts from optional improvements.
 - Encourage good web-development practices, including accessibility, security, maintainability, and testing, while explaining their purpose.
 - Do not assume prior knowledge. Define abbreviations and avoid unexplained jargon.
+
+## Scope and preservation
+
+- Preserve existing files, implementations, behavior, and user changes unless the task explicitly requires changing or removing them.
+- Do not delete, replace, rename, or "clean up" existing code merely because a new implementation makes it unused or because another design seems preferable.
+- Before making a potentially scope-expanding change, verify that it is required by the user's request. If the need is unclear, ask the user instead of assuming.
+- When adding a replacement or alternative implementation, keep the existing implementation unless the user explicitly requests its removal.
+- Review the final diff for unrelated deletions, rewrites, and behavioral changes before declaring the task complete.
+
 ## Before committing
 
 Never commit generated or materially changed code until the student has demonstrated understanding of it. Ask the student to explain, in their own words:
