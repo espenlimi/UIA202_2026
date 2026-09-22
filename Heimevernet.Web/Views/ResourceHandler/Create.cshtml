@@ -5,20 +5,23 @@
 }
 
 
-@if (Model == null)
+@if (Model == null || !ViewData.ModelState.IsValid)
 {
     <form asp-controller="ResourceHandler" asp-action="Create" method="post">
         <div>
             <label asp-for="Name"></label>
             <input asp-for="Name" />
+            <span asp-validation-for="Name"></span>
         </div>
         <div>
             <label asp-for="Description"></label>
             <input asp-for="Description" />
+            <span asp-validation-for="Description"></span>
         </div>
         <div>
             <label asp-for="Type"></label>
             <input asp-for="Type" />
+            <span asp-validation-for="Type"></span>
         </div>
         <button type="submit">Create</button>
     </form>

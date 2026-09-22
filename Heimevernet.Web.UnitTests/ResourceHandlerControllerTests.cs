@@ -39,7 +39,7 @@ public class ResourceHandlerControllerTests
     }
 
     [Fact]
-    public void Create_Post_ReturnsViewWithCreatedResource()
+    public void Create_Post_RedirectsToResource()
     {
         var model = GetResourceModel();
         var repository = Substitute.For<IResourceRepository>();
@@ -48,13 +48,26 @@ public class ResourceHandlerControllerTests
 
         var result = controller.Create(model);
 
-        var viewResult = Assert.IsType<ViewResult>(result);
-        var returnedModel = Assert.IsType<ResourceViewModel>(viewResult.Model);
-        Assert.Equal(1337, returnedModel.Id);
-        Assert.Equal(model.Name, returnedModel.Name);
-        Assert.Equal(model.Description, returnedModel.Description);
-        Assert.Equal(model.Type, returnedModel.Type);
+        var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("Index", redirectResult.ActionName);
+        Assert.Equal("Resource", redirectResult.ControllerName);
+        Assert.Equal(1337, redirectResult.RouteValues!["id"]);
         repository.Received(1).Create(model);
+    }
+
+    [Fact]
+    public void Create_Post_WhenModelIsInvalid_ReturnsViewWithSubmittedModel()
+    {
+        var model = GetResourceModel();
+        var repository = Substitute.For<IResourceRepository>();
+        var controller = new ResourceHandlerController(repository);
+        controller.ModelState.AddModelError(nameof(model.Name), "Name is too long");
+
+        var result = controller.Create(model);
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.Same(model, viewResult.Model);
+        repository.DidNotReceive().Create(Arg.Any<ResourceViewModel>());
     }
 
     [Fact]
