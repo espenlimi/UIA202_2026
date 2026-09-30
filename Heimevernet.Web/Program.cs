@@ -12,6 +12,10 @@ var connectionString = builder.Configuration.GetConnectionString("heimevernetdb"
 
 builder.Services.AddDbContext<HeimevernetDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+builder.Services.AddSingleton<IResourceDbConnectionFactory, MySqlResourceDbConnectionFactory>();
+// Replace the EF registration below with one of these to use another repository:
+// builder.Services.AddScoped<IResourceRepository, DapperResourceRepository>();
+// builder.Services.AddScoped<IResourceRepository, AdoNetResourceRepository>();
 builder.Services.AddScoped<IResourceRepository, EfResourceRepository>();
 
 var app = builder.Build();
