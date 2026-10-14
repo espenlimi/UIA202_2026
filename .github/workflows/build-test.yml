@@ -48,11 +48,11 @@ jobs:
           --results-directory ./TestResults
 
       - name: Generate coverage report
-        if: always() && hashFiles('TestResults/**/coverage.cobertura.xml') != ''
+        if: always() && hashFiles('TestResults/**/coverage.cobertura*.xml') != ''
         continue-on-error: true
         uses: danielpalme/ReportGenerator-GitHub-Action@5.5.11
         with:
-          reports: TestResults/**/coverage.cobertura.xml
+          reports: TestResults/**/coverage.cobertura*.xml
           targetdir: coverage-report
           reporttypes: Html;Cobertura;MarkdownSummaryGithub
 
