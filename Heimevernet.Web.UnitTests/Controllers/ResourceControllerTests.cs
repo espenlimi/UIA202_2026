@@ -5,7 +5,7 @@ using Heimevernet.Web.Models.ViewModels.Resource;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 
-namespace Heimevernet.Web.UnitTests;
+namespace Heimevernet.Web.UnitTests.Controllers;
 
 public class ResourceControllerTests
 {

@@ -1,6 +1,6 @@
 using Heimevernet.Web.Models;
 
-namespace Heimevernet.Web.UnitTests;
+namespace Heimevernet.Web.UnitTests.Models;
 
 public class ErrorViewModelTests
 {
