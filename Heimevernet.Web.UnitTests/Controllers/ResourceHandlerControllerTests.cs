@@ -5,7 +5,7 @@ using Heimevernet.Web.Models.ViewModels.Resource;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 
-namespace Heimevernet.Web.UnitTests;
+namespace Heimevernet.Web.UnitTests.Controllers;
 
 public class ResourceHandlerControllerTests
 {
@@ -15,7 +15,7 @@ public class ResourceHandlerControllerTests
         var resource = GetResource();
         var repository = Substitute.For<IResourceRepository>();
         repository.GetAll().Returns(new[] { resource });
-        var controller = new ResourceHandlerController(repository);
+        var controller = CreateController(repository);
 
         var result = controller.Index();
 
@@ -41,17 +41,39 @@ public class ResourceHandlerControllerTests
     [Fact]
     public void Create_Post_RedirectsToResource()
     {
-        var model = GetResourceModel();
-        var repository = Substitute.For<IResourceRepository>();
-        repository.Create(model).Returns(GetResource());
-        var controller = new ResourceHandlerController(repository);
+        //Arrange (please do not comment your own code like this.. )
+        var model = GetResourceModel(); //Get a ViewModel object to submit to the controller
+        var repository = Substitute.For<IResourceRepository>(); //Initialize the mock
+        var expectedNewId = 1337; //The ID we want the repository to return when a new resource is created
 
+
+        //Now, mock the create method != 
+        repository.Create(Arg.Any<ResourceViewModel>()).Returns(callInfo =>
+        {
+            //CallInfo gives whatever parameters that were passed to the method.
+            var submittedModel = callInfo.Arg<ResourceViewModel>();
+            return new Resource
+            {
+                Id = expectedNewId,
+                Name = submittedModel.Name,
+                Description = submittedModel.Description,
+                Type = submittedModel.Type
+            };
+        });
+        var controller = CreateController(repository);
+
+
+        //Act
         var result = controller.Create(model);
 
+
+        //Assert (but first, fetch some assertable results)
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("Index", redirectResult.ActionName);
         Assert.Equal("Resource", redirectResult.ControllerName);
-        Assert.Equal(1337, redirectResult.RouteValues!["id"]);
+        Assert.Equal(expectedNewId, redirectResult.RouteValues!["id"]);
+
+        //Verify number of calls to the create method with the specified parameters
         repository.Received(1).Create(model);
     }
 
@@ -60,7 +82,7 @@ public class ResourceHandlerControllerTests
     {
         var model = GetResourceModel();
         var repository = Substitute.For<IResourceRepository>();
-        var controller = new ResourceHandlerController(repository);
+        var controller = CreateController(repository);
         controller.ModelState.AddModelError(nameof(model.Name), "Name is too long");
 
         var result = controller.Create(model);
@@ -73,13 +95,18 @@ public class ResourceHandlerControllerTests
     [Fact]
     public void Edit_Get_WhenResourceExists_ReturnsViewWithResource()
     {
+        //Arrange
         var resource = GetResource();
-        var repository = Substitute.For<IResourceRepository>();
-        repository.GetById(resource.Id).Returns(resource);
-        var controller = new ResourceHandlerController(repository);
 
+        var repository = Substitute.For<IResourceRepository>();
+        repository.GetById(Arg.Any<int>()).Returns(resource);
+
+        var controller = CreateController(repository);
+        
+        //Act
         var result = controller.Edit(resource.Id);
 
+        //Assert
         var viewResult = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<ResourceViewModel>(viewResult.Model);
         Assert.Equal(resource.Id, model.Id);
@@ -93,7 +120,7 @@ public class ResourceHandlerControllerTests
     {
         var repository = Substitute.For<IResourceRepository>();
         repository.GetById(404).Returns((Resource?)null);
-        var controller = new ResourceHandlerController(repository);
+        var controller = CreateController(repository);
 
         var result = controller.Edit(404);
 
@@ -117,7 +144,7 @@ public class ResourceHandlerControllerTests
     public void Edit_Post_WhenModelHasNoId_ReturnsBadRequest()
     {
         var repository = Substitute.For<IResourceRepository>();
-        var controller = new ResourceHandlerController(repository);
+        var controller = CreateController(repository);
 
         var result = controller.Edit(GetResourceModel());
 
@@ -130,7 +157,7 @@ public class ResourceHandlerControllerTests
         var model = GetResourceModel(404);
         var repository = Substitute.For<IResourceRepository>();
         repository.Update(model.Id!.Value, model).Returns(false);
-        var controller = new ResourceHandlerController(repository);
+        var controller = CreateController(repository);
 
         var result = controller.Edit(model);
 
@@ -143,7 +170,7 @@ public class ResourceHandlerControllerTests
         var model = GetResourceModel(1337);
         var repository = Substitute.For<IResourceRepository>();
         repository.Update(model.Id!.Value, model).Returns(true);
-        var controller = new ResourceHandlerController(repository);
+        var controller = CreateController(repository);
 
         var result = controller.Edit(model);
 
@@ -157,7 +184,7 @@ public class ResourceHandlerControllerTests
     {
         var repository = Substitute.For<IResourceRepository>();
         repository.Delete(1337).Returns(true);
-        var controller = new ResourceHandlerController(repository);
+        var controller = CreateController(repository);
 
         var result = controller.Delete(1337);
 
@@ -171,16 +198,16 @@ public class ResourceHandlerControllerTests
     {
         var repository = Substitute.For<IResourceRepository>();
         repository.Delete(404).Returns(false);
-        var controller = new ResourceHandlerController(repository);
+        var controller = CreateController(repository);
 
         var result = controller.Delete(404);
 
         Assert.IsType<NotFoundResult>(result);
     }
 
-    private static ResourceHandlerController CreateController()
+    private static ResourceHandlerController CreateController(IResourceRepository? repository = null)
     {
-        return new ResourceHandlerController(Substitute.For<IResourceRepository>());
+        return new ResourceHandlerController(repository ?? Substitute.For<IResourceRepository>());
     }
 
     private static Resource GetResource()

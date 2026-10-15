@@ -3,7 +3,7 @@ using Heimevernet.Web.Models.Entities;
 using Heimevernet.Web.Models.ViewModels.Resource;
 using Microsoft.EntityFrameworkCore;
 
-namespace Heimevernet.Web.UnitTests;
+namespace Heimevernet.Web.UnitTests.DataAccess;
 
 public class EfResourceRepositoryTests
 {
