@@ -47,7 +47,7 @@ public class ResourceHandlerControllerTests
         var expectedNewId = 1337; //The ID we want the repository to return when a new resource is created
 
 
-        //Now, mock the create method
+        //Now, mock the create method != 
         repository.Create(Arg.Any<ResourceViewModel>()).Returns(callInfo =>
         {
             //CallInfo gives whatever parameters that were passed to the method.
@@ -95,17 +95,22 @@ public class ResourceHandlerControllerTests
     [Fact]
     public void Edit_Get_WhenResourceExists_ReturnsViewWithResource()
     {
+        //Arrange
         var resource = GetResource();
-        var repository = Substitute.For<IResourceRepository>();
-        repository.GetById(resource.Id).Returns(resource);
-        var controller = CreateController(repository);
 
+        var repository = Substitute.For<IResourceRepository>();
+        repository.GetById(Arg.Any<int>()).Returns(resource);
+
+        var controller = CreateController(repository);
+        
+        //Act
         var result = controller.Edit(resource.Id);
 
+        //Assert
         var viewResult = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<ResourceViewModel>(viewResult.Model);
         Assert.Equal(resource.Id, model.Id);
-        Assert.Equal(resource.Name, model.Name);
+        Assert.Equal(resource.Name, "Fiskepinne!");
         Assert.Equal(resource.Description, model.Description);
         Assert.Equal(resource.Type, model.Type);
     }
