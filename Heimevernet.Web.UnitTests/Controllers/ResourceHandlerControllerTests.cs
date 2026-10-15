@@ -110,7 +110,7 @@ public class ResourceHandlerControllerTests
         var viewResult = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<ResourceViewModel>(viewResult.Model);
         Assert.Equal(resource.Id, model.Id);
-        Assert.Equal(resource.Name, "Fiskepinne!");
+        Assert.Equal(resource.Name, model.Name);
         Assert.Equal(resource.Description, model.Description);
         Assert.Equal(resource.Type, model.Type);
     }
