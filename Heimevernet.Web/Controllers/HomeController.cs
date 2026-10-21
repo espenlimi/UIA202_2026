@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Heimevernet.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Heimevernet.Web.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     public IActionResult Index()

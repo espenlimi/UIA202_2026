@@ -63,6 +63,26 @@ The AppHost is not the website itself. It is the program that describes the loca
 
 The MVC application includes the `Resource` entity and an Entity Framework Core data-access implementation. Aspire supplies the `heimevernetdb` connection string to the web project, and the web project applies pending EF Core migrations when it starts. The initial migration creates the `Resources` table, and future schema changes should be added as new migrations.
 
+## Authentication and authorization
+
+Authentication uses ASP.NET Core Identity with Entity Framework Core by default. It creates the standard `AspNet*` user, role, claim, login, token, and user-role tables and creates the `Admin` role when the application starts.
+
+The custom login and password-reset pages are at `/Account/Login` and `/Account/ForgotPassword`. For this academic project, reset emails are written to the application log by `ConsoleEmailSender`; no real email is sent. This intentionally exposes reset links to log readers and must not be used in a production environment.
+
+Every application startup creates `admin@heimevernet.local` without a password and assigns the `Admin` role. Open `/Account/ForgotPassword` and submit that email address to generate a reset link in the application log, then choose the password yourself. This academic seed email is defined in `IdentitySeeder`.
+
+Every application startup also creates `user@heimevernet.local` without a password or roles. Use the same forgot-password flow to activate this regular user account.
+
+The single data-access setting in `Heimevernet.Web/appsettings.json` selects both the Identity store and Resource repository:
+
+```json
+"DataAccess": {
+  "Provider": "EntityFramework"
+}
+```
+
+Set `Provider` to `Dapper` or `AdoNet` to select the matching Identity and Resource data-access implementations together. Both Identity alternatives use the same `IIdentityUserRepository` contract and the standard Identity tables. `Heimevernet.Web/Database/001_create_identity_tables.sql` creates the same schema and can be used to initialize a MariaDB database manually; normal application startup uses the EF Core migration instead.
+
 ## Start the complete application
 
 Run these commands from the repository root:
