@@ -34,5 +34,85 @@ jobs:
       - name: Build solution
         run: dotnet build ./Heimevernet.slnx --configuration Release --no-restore
 
-      - name: Run tests
-        run: dotnet test ./Heimevernet.slnx --configuration Release --no-build --no-restore --verbosity normal
+      - name: Run tests with coverage
+        run: >
+          dotnet test ./Heimevernet.slnx
+          --configuration Release
+          --no-build
+          --no-restore
+          --verbosity normal
+          --output Detailed
+          --report-xunit-trx
+          --coverlet
+          --coverlet-output-format cobertura
+          --results-directory ./TestResults
+
+      - name: Generate coverage report
+        if: always() && hashFiles('TestResults/**/coverage.cobertura*.xml') != ''
+        continue-on-error: true
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.11
+        with:
+          reports: TestResults/**/coverage.cobertura*.xml
+          targetdir: coverage-report
+          reporttypes: Html;Cobertura;MarkdownSummaryGithub
+
+      - name: Add coverage to job summary
+        if: always() && hashFiles('coverage-report/SummaryGithub.md') != ''
+        continue-on-error: true
+        run: cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Summarize coverage
+        if: always() && hashFiles('coverage-report/Cobertura.xml') != ''
+        continue-on-error: true
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage-report/Cobertura.xml
+          fail_below_min: false
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: false
+          output: both
+
+      - name: Upload test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-and-coverage-reports
+          path: |
+            TestResults/
+            coverage-report/
+            code-coverage-results.md
+          if-no-files-found: warn
+
+  publish-pr-results:
+    name: Publish test results to pull request
+    needs: build-and-test
+    if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      checks: write
+      contents: read
+      issues: read
+      pull-requests: write
+    steps:
+      - name: Download test and coverage reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: test-and-coverage-reports
+
+      - name: Publish test results
+        if: always() && hashFiles('**/*.trx') != ''
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: '**/*.trx'
+          comment_title: Unit Test Results
+
+      - name: Comment coverage summary
+        if: always() && hashFiles('code-coverage-results.md') != ''
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: code-coverage
+          path: code-coverage-results.md

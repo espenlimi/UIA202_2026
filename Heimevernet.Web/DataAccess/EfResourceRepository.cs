@@ -6,6 +6,7 @@ namespace Heimevernet.Web.DataAccess;
 
 public class EfResourceRepository(HeimevernetDbContext dbContext) : IResourceRepository
 {
+
     public Resource Create(ResourceViewModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
