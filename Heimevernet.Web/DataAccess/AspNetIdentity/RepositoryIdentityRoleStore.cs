@@ -4,37 +4,52 @@ namespace Heimevernet.Web.DataAccess;
 
 public sealed class RepositoryIdentityRoleStore(IIdentityUserRepository repository) : IRoleStore<IdentityRole>
 {
-    private readonly Dictionary<string, string?> originalConcurrencyStamps = [];
+    private readonly Dictionary<IdentityRole, string?> originalConcurrencyStamps = new(ReferenceEqualityComparer.Instance);
 
     public void Dispose()
     {
+        originalConcurrencyStamps.Clear();
     }
 
     public async Task<IdentityResult> CreateAsync(IdentityRole role, CancellationToken cancellationToken)
     {
         await repository.CreateRoleAsync(role, cancellationToken);
-        originalConcurrencyStamps[role.Id] = role.ConcurrencyStamp;
+        originalConcurrencyStamps[role] = role.ConcurrencyStamp;
         return IdentityResult.Success;
     }
 
     public async Task<IdentityResult> UpdateAsync(IdentityRole role, CancellationToken cancellationToken)
     {
-        if (!originalConcurrencyStamps.TryGetValue(role.Id, out var originalConcurrencyStamp))
+        if (!originalConcurrencyStamps.TryGetValue(role, out var originalConcurrencyStamp))
         {
             return IdentityResult.Failed(
                 new IdentityError { Code = "ConcurrencyFailure", Description = "The original role version is unavailable." });
         }
 
-        var result = await repository.UpdateRoleAsync(role, originalConcurrencyStamp, cancellationToken)
-            ? IdentityResult.Success
-            : IdentityResult.Failed(new IdentityError { Code = "ConcurrencyFailure", Description = "The role could not be updated." });
+        var nextConcurrencyStamp = Guid.NewGuid().ToString();
+        role.ConcurrencyStamp = nextConcurrencyStamp;
 
-        if (result.Succeeded)
+        var updated = false;
+        try
         {
-            originalConcurrencyStamps[role.Id] = role.ConcurrencyStamp;
+            updated = await repository.UpdateRoleAsync(role, originalConcurrencyStamp, cancellationToken);
+        }
+        finally
+        {
+            if (!updated)
+            {
+                role.ConcurrencyStamp = originalConcurrencyStamp;
+            }
         }
 
-        return result;
+        if (!updated)
+        {
+            return IdentityResult.Failed(
+                new IdentityError { Code = "ConcurrencyFailure", Description = "The role could not be updated." });
+        }
+
+        originalConcurrencyStamps[role] = nextConcurrencyStamp;
+        return IdentityResult.Success;
     }
 
     public async Task<IdentityResult> DeleteAsync(IdentityRole role, CancellationToken cancellationToken)
@@ -88,7 +103,7 @@ public sealed class RepositoryIdentityRoleStore(IIdentityUserRepository reposito
     {
         if (role is not null)
         {
-            originalConcurrencyStamps[role.Id] = role.ConcurrencyStamp;
+            originalConcurrencyStamps[role] = role.ConcurrencyStamp;
         }
     }
 }

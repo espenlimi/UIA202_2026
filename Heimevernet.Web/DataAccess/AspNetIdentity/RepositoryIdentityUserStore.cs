@@ -9,10 +9,11 @@ public sealed class RepositoryIdentityUserStore(IIdentityUserRepository reposito
     IUserSecurityStampStore<IdentityUser>,
     IUserLockoutStore<IdentityUser>
 {
-    private readonly Dictionary<string, string?> originalConcurrencyStamps = [];
+    private readonly Dictionary<IdentityUser, string?> originalConcurrencyStamps = new(ReferenceEqualityComparer.Instance);
 
     public void Dispose()
     {
+        originalConcurrencyStamps.Clear();
     }
 
     public Task<IdentityResult> CreateAsync(IdentityUser user, CancellationToken cancellationToken)
@@ -22,22 +23,36 @@ public sealed class RepositoryIdentityUserStore(IIdentityUserRepository reposito
 
     public async Task<IdentityResult> UpdateAsync(IdentityUser user, CancellationToken cancellationToken)
     {
-        if (!originalConcurrencyStamps.TryGetValue(user.Id, out var originalConcurrencyStamp))
+        if (!originalConcurrencyStamps.TryGetValue(user, out var originalConcurrencyStamp))
         {
             return IdentityResult.Failed(
                 new IdentityError { Code = "ConcurrencyFailure", Description = "The original user version is unavailable." });
         }
 
-        var result = await repository.UpdateUserAsync(user, originalConcurrencyStamp, cancellationToken)
-            ? IdentityResult.Success
-            : IdentityResult.Failed(new IdentityError { Code = "ConcurrencyFailure", Description = "The user could not be updated." });
+        var nextConcurrencyStamp = Guid.NewGuid().ToString();
+        user.ConcurrencyStamp = nextConcurrencyStamp;
 
-        if (result.Succeeded)
+        var updated = false;
+        try
         {
-            originalConcurrencyStamps[user.Id] = user.ConcurrencyStamp;
+            updated = await repository.UpdateUserAsync(user, originalConcurrencyStamp, cancellationToken);
+        }
+        finally
+        {
+            if (!updated)
+            {
+                user.ConcurrencyStamp = originalConcurrencyStamp;
+            }
         }
 
-        return result;
+        if (!updated)
+        {
+            return IdentityResult.Failed(
+                new IdentityError { Code = "ConcurrencyFailure", Description = "The user could not be updated." });
+        }
+
+        originalConcurrencyStamps[user] = nextConcurrencyStamp;
+        return IdentityResult.Success;
     }
 
     public Task<IdentityResult> DeleteAsync(IdentityUser user, CancellationToken cancellationToken)
@@ -165,8 +180,7 @@ public sealed class RepositoryIdentityUserStore(IIdentityUserRepository reposito
 
     public async Task<bool> IsInRoleAsync(IdentityUser user, string normalizedRoleName, CancellationToken cancellationToken)
     {
-        var roles = await repository.GetUserRoleNamesAsync(user.Id, cancellationToken);
-        return roles.Contains(normalizedRoleName, StringComparer.Ordinal);
+        return await repository.IsUserInRoleAsync(user.Id, normalizedRoleName, cancellationToken);
     }
 
     public Task<IList<IdentityUser>> GetUsersInRoleAsync(string normalizedRoleName, CancellationToken cancellationToken)
@@ -227,7 +241,7 @@ public sealed class RepositoryIdentityUserStore(IIdentityUserRepository reposito
     private async Task<IdentityResult> CreateUserAsync(IdentityUser user, CancellationToken cancellationToken)
     {
         await repository.CreateUserAsync(user, cancellationToken);
-        originalConcurrencyStamps[user.Id] = user.ConcurrencyStamp;
+        originalConcurrencyStamps[user] = user.ConcurrencyStamp;
         return IdentityResult.Success;
     }
 
@@ -246,7 +260,7 @@ public sealed class RepositoryIdentityUserStore(IIdentityUserRepository reposito
     {
         if (user is not null)
         {
-            originalConcurrencyStamps[user.Id] = user.ConcurrencyStamp;
+            originalConcurrencyStamps[user] = user.ConcurrencyStamp;
         }
     }
 }

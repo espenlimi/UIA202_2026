@@ -93,7 +93,7 @@ public sealed class AdoNetIdentityUserRepository(IResourceDbConnectionFactory co
     public Task<IReadOnlyCollection<string>> GetUserRoleNamesAsync(string userId, CancellationToken cancellationToken)
     {
         const string sql = """
-            SELECT r.NormalizedName FROM AspNetRoles r
+            SELECT r.Name FROM AspNetRoles r
             INNER JOIN AspNetUserRoles ur ON ur.RoleId = r.Id
             WHERE ur.UserId = @UserId
             """;
@@ -108,6 +108,27 @@ public sealed class AdoNetIdentityUserRepository(IResourceDbConnectionFactory co
         }
 
         return Task.FromResult<IReadOnlyCollection<string>>(roles.AsReadOnly());
+    }
+
+    public Task<bool> IsUserInRoleAsync(
+        string userId,
+        string normalizedRoleName,
+        CancellationToken cancellationToken)
+    {
+        const string sql = """
+            SELECT EXISTS (
+                SELECT 1 FROM AspNetRoles r
+                INNER JOIN AspNetUserRoles ur ON ur.RoleId = r.Id
+                WHERE ur.UserId = @UserId AND r.NormalizedName = @NormalizedRoleName
+            )
+            """;
+        using var connection = connectionFactory.CreateConnection();
+        connection.Open();
+        using var command = CreateCommand(
+            connection,
+            sql,
+            [("@UserId", userId), ("@NormalizedRoleName", normalizedRoleName)]);
+        return Task.FromResult(Convert.ToBoolean(command.ExecuteScalar()));
     }
 
     public Task AddUserToRoleAsync(string userId, string roleId, CancellationToken cancellationToken)
@@ -203,7 +224,9 @@ public sealed class AdoNetIdentityUserRepository(IResourceDbConnectionFactory co
             TwoFactorEnabled = reader.GetBoolean(reader.GetOrdinal("TwoFactorEnabled")),
             LockoutEnd = reader.IsDBNull(reader.GetOrdinal("LockoutEnd"))
                 ? null
-                : new DateTimeOffset(reader.GetDateTime(reader.GetOrdinal("LockoutEnd"))),
+                : new DateTimeOffset(DateTime.SpecifyKind(
+                    reader.GetDateTime(reader.GetOrdinal("LockoutEnd")),
+                    DateTimeKind.Utc)),
             LockoutEnabled = reader.GetBoolean(reader.GetOrdinal("LockoutEnabled")),
             AccessFailedCount = reader.GetInt32(reader.GetOrdinal("AccessFailedCount"))
         };

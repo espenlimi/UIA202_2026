@@ -102,13 +102,32 @@ public sealed class DapperIdentityUserRepository(IResourceDbConnectionFactory co
     public async Task<IReadOnlyCollection<string>> GetUserRoleNamesAsync(string userId, CancellationToken cancellationToken)
     {
         const string sql = """
-            SELECT r.NormalizedName FROM AspNetRoles r
+            SELECT r.Name FROM AspNetRoles r
             INNER JOIN AspNetUserRoles ur ON ur.RoleId = r.Id
             WHERE ur.UserId = @UserId
             """;
         using var connection = connectionFactory.CreateConnection();
         var roles = await connection.QueryAsync<string>(new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken));
         return roles.ToList().AsReadOnly();
+    }
+
+    public async Task<bool> IsUserInRoleAsync(
+        string userId,
+        string normalizedRoleName,
+        CancellationToken cancellationToken)
+    {
+        const string sql = """
+            SELECT EXISTS (
+                SELECT 1 FROM AspNetRoles r
+                INNER JOIN AspNetUserRoles ur ON ur.RoleId = r.Id
+                WHERE ur.UserId = @UserId AND r.NormalizedName = @NormalizedRoleName
+            )
+            """;
+        using var connection = connectionFactory.CreateConnection();
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            sql,
+            new { UserId = userId, NormalizedRoleName = normalizedRoleName },
+            cancellationToken: cancellationToken));
     }
 
     public async Task AddUserToRoleAsync(string userId, string roleId, CancellationToken cancellationToken)

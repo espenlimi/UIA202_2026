@@ -36,6 +36,34 @@ public class RepositoryIdentityUserStoreTests
     }
 
     [Fact]
+    public async Task GetRolesAsync_ReturnsActualRoleNamesForClaims()
+    {
+        var repository = Substitute.For<IIdentityUserRepository>();
+        repository.GetUserRoleNamesAsync("user-id", CancellationToken.None)
+            .Returns(new[] { RoleNames.Admin });
+        var store = new RepositoryIdentityUserStore(repository);
+        var user = new IdentityUser { Id = "user-id" };
+
+        var roles = await store.GetRolesAsync(user, CancellationToken.None);
+
+        Assert.Equal([RoleNames.Admin], roles);
+    }
+
+    [Fact]
+    public async Task IsInRoleAsync_UsesNormalizedRoleMembership()
+    {
+        var repository = Substitute.For<IIdentityUserRepository>();
+        repository.IsUserInRoleAsync("user-id", "ADMIN", CancellationToken.None).Returns(true);
+        var store = new RepositoryIdentityUserStore(repository);
+        var user = new IdentityUser { Id = "user-id" };
+
+        var isInRole = await store.IsInRoleAsync(user, "ADMIN", CancellationToken.None);
+
+        Assert.True(isInRole);
+        await repository.Received(1).IsUserInRoleAsync("user-id", "ADMIN", CancellationToken.None);
+    }
+
+    [Fact]
     public async Task UpdateAsync_ReturnsConcurrencyFailureWhenRepositoryCannotUpdateUser()
     {
         var repository = Substitute.For<IIdentityUserRepository>();
@@ -43,14 +71,59 @@ public class RepositoryIdentityUserStoreTests
         var user = new IdentityUser();
         var originalConcurrencyStamp = user.ConcurrencyStamp;
         await store.CreateAsync(user, CancellationToken.None);
-        user.ConcurrencyStamp = "updated-concurrency-stamp";
         repository.UpdateUserAsync(user, originalConcurrencyStamp, CancellationToken.None).Returns(false);
 
         var result = await store.UpdateAsync(user, CancellationToken.None);
 
         Assert.False(result.Succeeded);
+        Assert.Equal(originalConcurrencyStamp, user.ConcurrencyStamp);
         Assert.Contains(result.Errors, error => error.Code == "ConcurrencyFailure");
         await repository.Received(1).UpdateUserAsync(user, originalConcurrencyStamp, CancellationToken.None);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_RotatesConcurrencyStampAfterSuccessfulUpdate()
+    {
+        var repository = Substitute.For<IIdentityUserRepository>();
+        repository.UpdateUserAsync(Arg.Any<IdentityUser>(), Arg.Any<string?>(), CancellationToken.None).Returns(true);
+        var store = new RepositoryIdentityUserStore(repository);
+        var user = new IdentityUser();
+        var originalConcurrencyStamp = user.ConcurrencyStamp;
+        await store.CreateAsync(user, CancellationToken.None);
+
+        var firstResult = await store.UpdateAsync(user, CancellationToken.None);
+        var firstUpdatedStamp = user.ConcurrencyStamp;
+        var secondResult = await store.UpdateAsync(user, CancellationToken.None);
+
+        Assert.True(firstResult.Succeeded);
+        Assert.True(secondResult.Succeeded);
+        Assert.NotEqual(originalConcurrencyStamp, firstUpdatedStamp);
+        Assert.NotEqual(firstUpdatedStamp, user.ConcurrencyStamp);
+        await repository.Received(1).UpdateUserAsync(user, originalConcurrencyStamp, CancellationToken.None);
+        await repository.Received(1).UpdateUserAsync(user, firstUpdatedStamp, CancellationToken.None);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_TracksOriginalStampPerUserInstance()
+    {
+        var repository = Substitute.For<IIdentityUserRepository>();
+        var staleUser = new IdentityUser { Id = "same-user-id", ConcurrencyStamp = "stale-stamp" };
+        var currentUser = new IdentityUser { Id = "same-user-id", ConcurrencyStamp = "current-stamp" };
+        repository.FindUserByIdAsync("same-user-id", CancellationToken.None)
+            .Returns(staleUser, currentUser);
+        var store = new RepositoryIdentityUserStore(repository);
+        var loadedStaleUser = Assert.IsType<IdentityUser>(
+            await store.FindByIdAsync("same-user-id", CancellationToken.None));
+        await store.FindByIdAsync("same-user-id", CancellationToken.None);
+
+        var result = await store.UpdateAsync(loadedStaleUser, CancellationToken.None);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("stale-stamp", loadedStaleUser.ConcurrencyStamp);
+        await repository.Received(1).UpdateUserAsync(
+            loadedStaleUser,
+            "stale-stamp",
+            CancellationToken.None);
     }
 
     [Fact]

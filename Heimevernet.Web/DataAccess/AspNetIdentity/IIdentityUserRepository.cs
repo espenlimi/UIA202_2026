@@ -16,6 +16,7 @@ public interface IIdentityUserRepository
     Task<IdentityRole?> FindRoleByIdAsync(string roleId, CancellationToken cancellationToken);
     Task<IdentityRole?> FindRoleByNormalizedNameAsync(string normalizedRoleName, CancellationToken cancellationToken);
     Task<IReadOnlyCollection<string>> GetUserRoleNamesAsync(string userId, CancellationToken cancellationToken);
+    Task<bool> IsUserInRoleAsync(string userId, string normalizedRoleName, CancellationToken cancellationToken);
     Task AddUserToRoleAsync(string userId, string roleId, CancellationToken cancellationToken);
     Task RemoveUserFromRoleAsync(string userId, string roleId, CancellationToken cancellationToken);
 }
