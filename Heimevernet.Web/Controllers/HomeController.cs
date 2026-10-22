@@ -1,16 +1,19 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Heimevernet.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Heimevernet.Web.Controllers;
 
+
 public class HomeController : Controller
 {
+    [Authorize]
     public IActionResult Index()
     {
         return View();
     }
-
+    [Authorize]
     public IActionResult Privacy()
     {
         return View();

@@ -1,5 +1,6 @@
 ﻿using Heimevernet.Web.DataAccess;
 using Heimevernet.Web.Models.ViewModels.Resource;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Heimevernet.Web.Controllers
@@ -12,6 +13,7 @@ namespace Heimevernet.Web.Controllers
         {
             _resourceRepository = resourceRepository;
         }
+        [Authorize]
         public IActionResult Index(int? id)
         {
 

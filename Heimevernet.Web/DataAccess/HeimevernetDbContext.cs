@@ -1,15 +1,19 @@
 using Heimevernet.Web.Models.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Heimevernet.Web.DataAccess;
 
-public class HeimevernetDbContext(DbContextOptions<HeimevernetDbContext> options) : DbContext(options)
+public class HeimevernetDbContext(DbContextOptions<HeimevernetDbContext> options)
+    : IdentityDbContext<IdentityUser, IdentityRole, string>(options)
 {
     public DbSet<Resource> Resources => Set<Resource>();
-    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Resource>(entity =>
         {
             entity.ToTable("Resources");

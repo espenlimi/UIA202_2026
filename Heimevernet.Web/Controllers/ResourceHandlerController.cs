@@ -1,9 +1,12 @@
 ﻿using Heimevernet.Web.DataAccess;
+using Heimevernet.Web.Models.Authorization;
 using Heimevernet.Web.Models.ViewModels.Resource;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Heimevernet.Web.Controllers
 {
+    [Authorize(Roles = RoleNames.Admin)]
     public class ResourceHandlerController : Controller
     {
         private readonly IResourceRepository _resourceRepository;
