@@ -9,9 +9,7 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace Heimevernet.Web.Controllers;
 
-public sealed class AccountController(
-    UserManager<IdentityUser> userManager,
-    SignInManager<IdentityUser> signInManager,
+public sealed class AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager,
     IEmailSender emailSender) : Controller
 {
     [AllowAnonymous]
@@ -22,8 +20,14 @@ public sealed class AccountController(
     }
 
     [AllowAnonymous]
+    [HttpGet]
+    public IActionResult AccessDenied()
+    {
+        return View();
+    }
+
+    [AllowAnonymous]
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
         if (!ModelState.IsValid)
@@ -51,7 +55,6 @@ public sealed class AccountController(
 
     [Authorize]
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
         await signInManager.SignOutAsync();
@@ -67,7 +70,6 @@ public sealed class AccountController(
 
     [AllowAnonymous]
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
         if (!ModelState.IsValid)
@@ -104,7 +106,6 @@ public sealed class AccountController(
 
     [AllowAnonymous]
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
     {
         if (!ModelState.IsValid)
@@ -154,7 +155,6 @@ public sealed class AccountController(
 
     [AllowAnonymous]
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
     {
         if (!ModelState.IsValid)

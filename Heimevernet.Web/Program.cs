@@ -18,7 +18,6 @@ builder.Services.AddDbContext<HeimevernetDbContext>(options =>
 builder.Services.AddSingleton<IResourceDbConnectionFactory, MySqlResourceDbConnectionFactory>();
 builder.Services.AddSingleton<IEmailSender, ConsoleEmailSender>();
 
-var dataAccessProvider = builder.Configuration["DataAccess:Provider"] ?? "EntityFramework";
 var identityBuilder = builder.Services
     .AddIdentity<IdentityUser, IdentityRole>(options =>
     {
@@ -29,6 +28,7 @@ var identityBuilder = builder.Services
     })
     .AddDefaultTokenProviders();
 
+var dataAccessProvider = builder.Configuration["DataAccess:Provider"] ?? "EntityFramework";
 switch (dataAccessProvider.ToUpperInvariant())
 {
     case "ENTITYFRAMEWORK":

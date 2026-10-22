@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Heimevernet.Web.Controllers
 {
-    [Authorize]
     public class ResourceController : Controller
     {
         private readonly IResourceRepository _resourceRepository;
@@ -14,6 +13,7 @@ namespace Heimevernet.Web.Controllers
         {
             _resourceRepository = resourceRepository;
         }
+        [Authorize]
         public IActionResult Index(int? id)
         {
 

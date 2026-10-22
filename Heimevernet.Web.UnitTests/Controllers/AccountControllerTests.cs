@@ -26,6 +26,16 @@ public class AccountControllerTests
     }
 
     [Fact]
+    public void AccessDenied_ReturnsView()
+    {
+        var controller = CreateController();
+
+        var result = controller.AccessDenied();
+
+        Assert.IsType<ViewResult>(result);
+    }
+
+    [Fact]
     public async Task Login_Post_WithInvalidModel_ReturnsTheEnteredModel()
     {
         var controller = CreateController();
