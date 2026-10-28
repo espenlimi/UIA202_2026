@@ -1,5 +1,14 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    var cspNonce = Context.Items[Heimevernet.Web.Middleware.ContentSecurityPolicyMiddleware.NonceItemKey] as string
+        ?? throw new InvalidOperationException("The content security policy nonce was not configured.");
+}
+
+@section Styles {
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="anonymous" />
 }
 
 <div class="text-center">
@@ -7,3 +16,21 @@
     <p>Det tar en time å gå ned til Ørsta rådhus!</p>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<div id="map" class="leaflet-map" role="region" aria-label="Map of Ørsta"></div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin="anonymous"></script>
+    <script nonce="@cspNonce">
+        const map = L.map('map').setView([62.2025, 6.1276], 13);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        L.marker([62.2025, 6.1276]).addTo(map).bindPopup('Ørsta');
+    </script>
+}

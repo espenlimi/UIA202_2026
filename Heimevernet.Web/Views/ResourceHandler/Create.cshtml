@@ -7,7 +7,7 @@
 
 @if (Model == null || !ViewData.ModelState.IsValid)
 {
-    <form asp-controller="ResourceHandler" asp-action="Create" method="post">
+    <form asp-controller="ResourceHandler" asp-action="Create" method="post" asp-antiforgery="true">
         <div>
             <label asp-for="Name"></label>
             <input asp-for="Name" />
