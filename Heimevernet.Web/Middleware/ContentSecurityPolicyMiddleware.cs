@@ -14,7 +14,7 @@ public sealed class ContentSecurityPolicyMiddleware(RequestDelegate next)
             "object-src 'none'", // Blocks embedded plug-in content such as <object> and <embed>.
             "frame-ancestors 'none'", // Prevents this site from being embedded in frames.
             "form-action 'self'", // Restricts form submissions to this site.
-            $"script-src 'self' https://unpkg.com 'nonce-{nonce}'", // Allows local/CDN scripts and inline scripts carrying this response's nonce; blocks other inline scripts.
+            $"script-src 'self' https://unpkg.com/leaflet@1.9.4/dist/leaflet.js 'nonce-{nonce}'", // Allows local scripts, the pinned Leaflet script, and inline scripts carrying this response's nonce.
             "style-src 'self' https://unpkg.com", // Allows local and Leaflet CDN stylesheets.
             "img-src 'self' data: https://unpkg.com https://tile.openstreetmap.org", // Allows local images, Leaflet icons, and map tiles.
             "font-src 'self' data:", // Allows local fonts and embedded data fonts.
