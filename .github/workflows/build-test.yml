@@ -45,6 +45,7 @@ jobs:
           --report-xunit-trx
           --coverlet
           --coverlet-output-format cobertura
+          --coverlet-exclude-by-file "**/*.cshtml"
           --results-directory ./TestResults
 
       - name: Generate coverage report
