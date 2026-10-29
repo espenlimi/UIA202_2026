@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Endre Ressurs";
 }
-    <form asp-controller="ResourceHandler" asp-action="Edit" method="post" asp-antiforgery="true">
+    <form asp-controller="ResourceHandler" asp-action="Edit" method="post">
         <div>
             <label asp-for="Name"></label>
             <input asp-for="Name" value="@Model.Name" />

@@ -22,7 +22,7 @@
             <td>@item.Type</td>
             <td>
                 <a asp-controller="ResourceHandler" asp-action="Edit" asp-route-id="@item.Id">Rediger</a> |
-                <form asp-controller="ResourceHandler" asp-action="Delete" asp-route-id="@item.Id" method="post" asp-antiforgery="true" class="resource-delete-form">
+                <form asp-controller="ResourceHandler" asp-action="Delete" asp-route-id="@item.Id" method="post" class="resource-delete-form">
                     <button type="submit">Slett</button>
                 </form>
             </td>
